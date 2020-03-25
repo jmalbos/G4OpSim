@@ -1,0 +1,43 @@
+/control/verbose 2
+/control/saveHistory
+/run/verbose 2
+/tracking/verbose 2
+
+/vis/scene/create
+/vis/open OGL
+
+### Setting drawing style to "wireframe" / "surface"
+/vis/viewer/set/style wireframe
+
+### Draw scene (isometric view)
+/vis/viewer/set/viewpointThetaPhi
+
+### View offset: Left Up dimensions
+#/vis/viewer/panTo 700 0 mm
+
+### Adding axes x y z size dimensions
+#/vis/scene/add/axes -1200 0 0 300 mm
+
+### Zoom up/down of view
+#/vis/viewer/zoom 1.4
+
+### Create an empty scene and add the detector geometry
+/vis/drawVolume
+
+### Drawing the tracks (if chosen in user actions)
+# Parameter (omittable) (default=0):
+# 0 : Don't Store trajectories. (if too many tracks cause core dump, use this option)
+# 1 : Choose G4Trajectory as default.
+# 2 : Choose G4SmoothTrajectory as default.
+# 3 : Choose G4RichTrajectory as default.
+# 4 : Choose G4RichTrajectory with auxiliary points as default.
+/tracking/storeTrajectory 2
+
+# Add trajectories to the current scene
+# Parameter (omittable). Options: "smooth", "rich"
+/vis/scene/add/trajectories smooth
+
+# Requests viewer to accumulate hits, tracks, etc. at end of event.
+# 1st param (omittable): "accumulate" or "refresh"
+# 2nd param (omittable): <integer> (default = 100)
+/vis/scene/endOfEventAction accumulate
