@@ -11,16 +11,17 @@
 #include <G4VUserDetectorConstruction.hh>
 
 class G4Material;
+class G4LogicalVolume;
 
 
 class DetectorConstruction: public G4VUserDetectorConstruction
 {
 public:
   DetectorConstruction();
-  virtual ~DetectorConstruction();
-  virtual G4VPhysicalVolume* Construct();
+  ~DetectorConstruction();
+  G4VPhysicalVolume* Construct();
 private:
-  G4Material* EnrichedXenon() const;
+  G4LogicalVolume* GenericPhotosensor();
 };
 
 #endif

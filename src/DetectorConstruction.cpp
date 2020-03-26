@@ -21,6 +21,8 @@
 #include <G4RotationMatrix.hh>
 #include <G4UserLimits.hh>
 #include <G4SDManager.hh>
+#include <G4OpticalSurface.hh>
+#include <G4LogicalSkinSurface.hh>
 
 
 DetectorConstruction::DetectorConstruction(): G4VUserDetectorConstruction()
@@ -125,4 +127,100 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   //////////////////////////////////////////////////////////
 
   return world_phys_vol;
+}
+
+
+G4LogicalVolume* DetectorConstruction::GenericPhotosensor()
+{
+  // PHOTOSENSOR ENCASING //////////////////////////////////
+
+  const G4double width_     = 6.*mm;
+  const G4double height_    = 6.*mm;
+  const G4double thickness_ = 2.*mm;
+
+  G4String name = "PHOTOSENSOR";
+
+  G4Box* encasing_solid_vol =
+    new G4Box(name, width_/2., height_/2., thickness_/2.);
+
+  G4LogicalVolume* encasing_logic_vol =
+    new G4LogicalVolume(encasing_solid_vol,
+                        G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON"),
+                        name);
+
+  // OPTICAL WINDOW ////////////////////////////////////////
+
+  name = "PHOTOSENSOR_WINDOW";
+
+  G4double window_thickness = thickness_/4.;
+
+  G4Box* window_solid_vol =
+    new G4Box(name, width_/2., height_/2., window_thickness/2.);
+
+
+  G4LogicalVolume* window_logic_vol =
+    new G4LogicalVolume(window_solid_vol,
+                        G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON"),
+                        name);
+
+  G4double zpos = thickness_/2. - window_thickness/2.;
+
+  new G4PVPlacement(nullptr, G4ThreeVector(0., 0., zpos),
+                    window_logic_vol, name, encasing_logic_vol,
+                    false, 0, false);
+
+  // PHOTOSENSITIVE AREA /////////////////////////////////////////////
+
+  name = "PHOTOSENSOR_SENSAREA";
+
+  G4double sensarea_thickness = 0.1*mm;
+
+  G4Box* sensarea_solid_vol =
+    new G4Box(name, width_/2., height_/2., sensarea_thickness/2.);
+
+  G4LogicalVolume* sensarea_logic_vol =
+    new G4LogicalVolume(sensarea_solid_vol,
+                        G4NistManager::Instance()->FindOrBuildMaterial("G4_Si"),
+                        name);
+
+  zpos = thickness_/2. - window_thickness - sensarea_thickness/2.;
+
+  new G4PVPlacement(nullptr, G4ThreeVector(0., 0., zpos),
+                    sensarea_logic_vol, name, encasing_logic_vol,
+                    false, 0, false);
+
+  // OPTICAL PROPERTIES //////////////////////////////////////////////
+
+  name = "PHOTOSENSOR_OPSURF";
+
+  G4double energy[]       = {0.2*eV, 11.5*eV};
+  G4double reflectivity[] = {0.0   ,  0.0};
+  G4double efficiency[]   = {1.0   ,  1.0};
+
+  G4MaterialPropertiesTable* photosensor_mpt = new G4MaterialPropertiesTable();
+  photosensor_mpt->AddProperty("REFLECTIVITY", energy, reflectivity, 2);
+  photosensor_mpt->AddProperty("EFFICIENCY",   energy, efficiency,   2);
+
+  G4OpticalSurface* photosensor_opsurf =
+    new G4OpticalSurface(name, unified, polished, dielectric_metal);
+  photosensor_opsurf->SetMaterialPropertiesTable(photosensor_mpt);
+  new G4LogicalSkinSurface(name, sensarea_logic_vol, photosensor_opsurf);
+
+  // // SENSITIVE DETECTOR //////////////////////////////////////////////
+  //
+  // G4String sdname = "/GENERIC_PHOTOSENSOR/SiPM";
+  // G4SDManager* sdmgr = G4SDManager::GetSDMpointer();
+  //
+  // if (!sdmgr->FindSensitiveDetector(sdname, false)) {
+  //   PmtSD* sensdet = new PmtSD(sdname);
+  //   sensdet->SetDetectorVolumeDepth(1);
+  //   sensdet->SetDetectorNamingOrder(1000.);
+  //   sensdet->SetTimeBinning(time_binning_);
+  //   sensdet->SetMotherVolumeDepth(2);
+  //
+  //   G4SDManager::GetSDMpointer()->AddNewDetector(sensdet);
+  //   window_logic_vol->SetSensitiveDetector(sensdet);
+  // }
+
+  return encasing_logic_vol;
 }
