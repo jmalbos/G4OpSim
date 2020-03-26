@@ -1,4 +1,10 @@
-## G4Basic | CMakeLists.txt
+## -----------------------------------------------------------------------------
+##  G4OpSim | CMakeLists.txt
+##
+##  * Author: <justo.martin-albo@ific.uv.es>
+##  * Creation date: 10 February 2020
+## -----------------------------------------------------------------------------
+
 
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(G4OPSIM)
@@ -23,6 +29,6 @@ include(${Geant4_USE_FILE})
 ## Recurse through sub-directories
 add_subdirectory(src)
 
-add_executable(G4OpSim G4OpSim.cpp $<TARGET_OBJECTS:G4OPSIM_SRC>)
+add_executable(G4OpSim G4OpSim.cpp $<TARGET_OBJECTS:${CMAKE_PROJECT_NAME}_SRC>)
 target_include_directories(G4OpSim PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(G4OpSim ${Geant4_LIBRARIES})
