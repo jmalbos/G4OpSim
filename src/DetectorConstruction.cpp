@@ -47,7 +47,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   G4LogicalVolume* world_logic_vol =
     new G4LogicalVolume(world_solid_vol,
-                        G4NistManager::Instance()->FindOrBuildMaterial("lAr"),
+                        G4NistManager::Instance()->FindOrBuildMaterial("G4_lAr"),
                         world_name);
 
   G4VPhysicalVolume* world_phys_vol =
@@ -94,10 +94,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                         G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE"),
                         filter_name);
 
-  G4double zpos = plate_thickn/2. + filter_thickn/2. + 4.*mm;
+  G4double ypos = plate_thickn/2. + filter_thickn/2. + 4.*mm;
 
   //G4VPhysicalVolume* filter_phys_vol =
-    new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,zpos),
+    new G4PVPlacement(nullptr, G4ThreeVector(0.,ypos,0.),
                       filter_logic_vol, filter_name, world_logic_vol,
                       false, 0, true);
 
@@ -117,10 +117,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                         G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON"),
                         refl_name);
 
-  zpos = refl_thickn/2. + refl_thickn/2. - 4.*mm;
-
   //G4VPhysicalVolume* refl_phys_vol =
-    new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,zpos),
+    new G4PVPlacement(nullptr, G4ThreeVector(0.,-ypos,0.),
                       refl_logic_vol, refl_name, world_logic_vol,
                       false, 0, true);
 
