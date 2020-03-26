@@ -8,6 +8,9 @@
 #ifndef OPTICAL_MATERIAL_PROPERTIES_H
 #define OPTICAL_MATERIAL_PROPERTIES_H
 
+#include <G4Types.hh>
+#include <G4SystemOfUnits.hh>
+
 class G4MaterialPropertiesTable;
 
 
