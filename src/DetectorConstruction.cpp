@@ -1,7 +1,8 @@
 // -----------------------------------------------------------------------------
-//  G4Basic | DetectorConstruction.cpp
+//  G4OpSim | DetectorConstruction.cpp
 //
-//
+//  * Author: <justo.martin-albo@ific.uv.es>
+//  * Creation date: 10 February 2020
 // -----------------------------------------------------------------------------
 
 #include "DetectorConstruction.h"
@@ -36,15 +37,15 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 {
   // WORLD /////////////////////////////////////////////////
 
-  G4String world_name = "WORLD";
-  G4double world_size = 25.*m;
+  const G4String world_name = "WORLD";
+  const G4double world_size = 10.*m;
 
   G4Sphere* world_solid_vol =
     new G4Sphere(world_name, 0., world_size/2., 0., 360.*deg, 0., 180.*deg);
 
   G4LogicalVolume* world_logic_vol =
     new G4LogicalVolume(world_solid_vol,
-                        G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic"),
+                        G4NistManager::Instance()->FindOrBuildMaterial("lAr"),
                         world_name);
 
   G4VPhysicalVolume* world_phys_vol =
@@ -54,57 +55,74 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   world_logic_vol->SetVisAttributes(G4VisAttributes::Invisible);
 
-  // DETECTOR //////////////////////////////////////////////
+  // WLS PLATE /////////////////////////////////////////////
 
-  G4String detector_name = "DETECTOR";
-  G4double detector_size = 10.*m;
+  const G4String plate_name = "WLS_PLATE";
 
-  G4Box* detector_solid_vol =
-    new G4Box(detector_name, detector_size/2., detector_size/2., detector_size/2.);
+  const G4double plate_width  = 112.0*mm; // X
+  const G4double plate_thickn =   4.0*mm; // Y
+  const G4double plate_length = 491.5*mm; // Z
 
-  G4LogicalVolume* detector_logic_vol =
-    new G4LogicalVolume(detector_solid_vol, EnrichedXenon(), detector_name);
+  G4Box* plate_solid_vol =
+    new G4Box(plate_name, plate_width/2., plate_thickn/2., plate_length/2.);
 
-  new G4PVPlacement(0, G4ThreeVector(0.,0.,0.),
-                    detector_logic_vol, detector_name, world_logic_vol,
-                    false, 0, true);
+  G4LogicalVolume* plate_logic_vol =
+    new G4LogicalVolume(plate_solid_vol,
+                        G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE"),
+                        plate_name);
 
-  //////////////////////////////////////////////////////////
+  //G4VPhysicalVolume* plate_phys_vol =
+    new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,0.),
+                      plate_logic_vol, plate_name, world_logic_vol,
+                      false, 0, true);
 
-  // Step limit and sensitive detector
+  // DICHROIC FILTER ///////////////////////////////////////
 
-  G4UserLimits* step_limit = new G4UserLimits(1.*mm);
-  detector_logic_vol->SetUserLimits(step_limit);
+  const G4String filter_name = "DICHROIC_FILTER";
 
-  TrackingSD* tsd = new TrackingSD("G4BASIC/TRACKING_SD",
-                                   "TrackingHitsCollection");
-  G4SDManager::GetSDMpointer()->AddNewDetector(tsd);
-  detector_logic_vol->SetSensitiveDetector(tsd);
+  const G4double filter_width  = 112.0*mm; // X
+  const G4double filter_thickn =   4.0*mm; // Y
+  const G4double filter_length = 491.5*mm; // Z
+
+  G4Box* filter_solid_vol =
+    new G4Box(filter_name, filter_width/2., filter_thickn/2., filter_length/2.);
+
+  G4LogicalVolume* filter_logic_vol =
+    new G4LogicalVolume(filter_solid_vol,
+                        G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE"),
+                        filter_name);
+
+  G4double zpos = plate_thickn/2. + filter_thickn/2. + 4.*mm;
+
+  //G4VPhysicalVolume* filter_phys_vol =
+    new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,zpos),
+                      filter_logic_vol, filter_name, world_logic_vol,
+                      false, 0, true);
+
+  // BACK REFLECTOR ////////////////////////////////////////
+
+  const G4String refl_name = "BACK_REFLECTOR";
+
+  const G4double refl_width  = 112.0*mm; // X
+  const G4double refl_thickn =   4.0*mm; // Y
+  const G4double refl_length = 491.5*mm; // Z
+
+  G4Box* refl_solid_vol =
+    new G4Box(refl_name, refl_width/2., refl_thickn/2., refl_length/2.);
+
+  G4LogicalVolume* refl_logic_vol =
+    new G4LogicalVolume(refl_solid_vol,
+                        G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON"),
+                        refl_name);
+
+  zpos = refl_thickn/2. + refl_thickn/2. - 4.*mm;
+
+  //G4VPhysicalVolume* refl_phys_vol =
+    new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,zpos),
+                      refl_logic_vol, refl_name, world_logic_vol,
+                      false, 0, true);
 
   //////////////////////////////////////////////////////////
 
   return world_phys_vol;
-}
-
-
-G4Material* DetectorConstruction::EnrichedXenon() const
-{
-  G4String name = "ENRICHED_XENON";
-  G4double pressure    = 15.0 * bar;
-  G4double temperature = STP_Temperature; // 273.15 K
-  G4double density     = 97.49 * kg/m3;
-
-  G4Material* material =
-    new G4Material(name, density, 1, kStateGas, temperature, pressure);
-
-  G4Element* Xe = new G4Element("ENRICHED_XENON", "Xe", 2);
-
-  G4Isotope* Xe134 = new G4Isotope("Xe134", 54, 134, 133.905395*g/mole);
-  G4Isotope* Xe136 = new G4Isotope("Xe136", 54, 136, 135.907219*g/mole);
-  Xe->AddIsotope(Xe134,  9.*perCent);
-  Xe->AddIsotope(Xe136, 91.*perCent);
-
-  material->AddElement(Xe,1);
-
-  return material;
 }

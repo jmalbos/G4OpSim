@@ -1,7 +1,8 @@
 // -----------------------------------------------------------------------------
-//  G4Basic | DetectorConstruction.h
+//  G4OpSim | DetectorConstruction.h
 //
-//
+//  * Author: <justo.martin-albo@ific.uv.es>
+//  * Creation date: 10 February 2020
 // -----------------------------------------------------------------------------
 
 #ifndef DETECTOR_CONSTRUCTION_H
