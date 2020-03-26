@@ -8,12 +8,12 @@
 
 #include "Materials.h"
 
+#include <G4SystemOfUnits.hh>
+#include <G4NistManager.hh>
 #include <G4Material.hh>
 
-using namespace Materials;
 
-
-G4Material* FR4()
+G4Material* Materials::FR4()
 {
   // FR-4 is a composite material widely used for printed circuits boards.
   // It consists of woven fiberglass cloth with an epoxy resin binder that is
@@ -24,15 +24,15 @@ G4Material* FR4()
 
   if (!mat) {
     mat = new G4Material(name, 1.850*g/cm3, 2, kStateSolid);
-    mat->AddMaterial(MaterialsList::FusedSilica(), 0.60);
-    mat->AddMaterial(MaterialsList::Epoxy(),       0.40);
+    mat->AddMaterial(Materials::FusedSilica(), 0.60);
+    mat->AddMaterial(Materials::Epoxy(),       0.40);
   }
 
   return mat;
 }
 
 
-G4Material* OpticalSilicone()
+G4Material* Materials::OpticalSilicone()
 {
   // Silicone resin with a methyl group
   // (https://en.wikipedia.org/wiki/Silicone_resin)
@@ -56,5 +56,39 @@ G4Material* OpticalSilicone()
     mat->AddElement(O,  1);
   }
 
+  return mat;
+}
+
+
+G4Material* Materials::Epoxy()
+{
+  // Definition taken from the Geant4 advanced example "Composite Calorimeter"
+  // (Geant4/examples/advanced/composite_calorimeter/dataglobal/material.cms).
+
+  const G4String name = "EPOXY";
+
+  G4Material* mat = G4Material::GetMaterial(name, false);
+
+  if (!mat) {
+    G4NistManager* nist = G4NistManager::Instance();
+
+    G4Element* H = nist->FindOrBuildElement("H");
+    G4Element* C = nist->FindOrBuildElement("C");
+    G4Element* O = nist->FindOrBuildElement("O");
+
+    mat = new G4Material(name, 1.3*g/cm3, 3);
+    mat->AddElement(H, 44);
+    mat->AddElement(C, 15);
+    mat->AddElement(O, 7);
+  }
+
+  return mat;
+}
+
+
+G4Material* Materials::FusedSilica()
+{
+  G4Material* mat =
+    G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
   return mat;
 }

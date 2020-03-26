@@ -18,6 +18,10 @@ namespace Materials {
 
   G4Material* OpticalSilicone();
 
+  G4Material* Epoxy();
+
+  G4Material* FusedSilica();
+
 } // end namespace Materials
 
 #endif
