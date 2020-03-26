@@ -7,6 +7,7 @@
 
 #include "DetectorConstruction.h"
 
+#include "Materials.h"
 #include "TrackingSD.h"
 
 #include <G4Box.hh>
@@ -142,9 +143,7 @@ G4LogicalVolume* DetectorConstruction::GenericPhotosensor()
     new G4Box(name, width_/2., height_/2., thickness_/2.);
 
   G4LogicalVolume* encasing_logic_vol =
-    new G4LogicalVolume(encasing_solid_vol,
-                        G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON"),
-                        name);
+    new G4LogicalVolume(encasing_solid_vol, Materials::FR4(), name);
 
   // OPTICAL WINDOW ////////////////////////////////////////
 
@@ -158,7 +157,7 @@ G4LogicalVolume* DetectorConstruction::GenericPhotosensor()
 
   G4LogicalVolume* window_logic_vol =
     new G4LogicalVolume(window_solid_vol,
-                        G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON"),
+                        Materials::OpticalSilicone(),
                         name);
 
   G4double zpos = thickness_/2. - window_thickness/2.;
