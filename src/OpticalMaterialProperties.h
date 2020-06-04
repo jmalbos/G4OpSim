@@ -23,6 +23,8 @@ namespace OpticalMaterialProperties {
 
   G4MaterialPropertiesTable* LAr();
 
+  G4MaterialPropertiesTable* PVT();
+
 } // end namespace
 
 #endif
