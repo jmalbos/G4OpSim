@@ -16,8 +16,11 @@ class G4MaterialPropertiesTable;
 
 namespace OpticalMaterialProperties {
 
-  const G4double min_energy =  2.0 * eV;
-  const G4double max_energy = 11.5 * eV;
+  inline const G4double energy_min =  2.0 * eV; // 620 nm
+  inline const G4double energy_max = 11.3 * eV; // 110 nm
+
+  inline const G4double abslength_min = 1. * nm;
+  inline const G4double abslength_max = 1.E4 * m;
 
   G4MaterialPropertiesTable* Vacuum();
 
