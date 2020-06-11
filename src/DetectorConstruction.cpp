@@ -9,6 +9,7 @@
 
 #include "Materials.h"
 #include "TrackingSD.h"
+#include "OpticalMaterialProperties.h"
 
 #include <G4Box.hh>
 #include <G4Tubs.hh>
@@ -46,10 +47,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Sphere* world_solid_vol =
     new G4Sphere(world_name, 0., world_size/2., 0., 360.*deg, 0., 180.*deg);
 
+  G4Material* LAr = G4NistManager::Instance()->FindOrBuildMaterial("G4_lAr");
+  LAr->SetMaterialPropertiesTable(OpticalMaterialProperties::LAr());
+
   G4LogicalVolume* world_logic_vol =
-    new G4LogicalVolume(world_solid_vol,
-                        G4NistManager::Instance()->FindOrBuildMaterial("G4_lAr"),
-                        world_name);
+    new G4LogicalVolume(world_solid_vol, LAr, world_name);
 
   G4VPhysicalVolume* world_phys_vol =
     new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,0.),
@@ -69,10 +71,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Box* plate_solid_vol =
     new G4Box(plate_name, plate_width/2., plate_thickn/2., plate_length/2.);
 
-  G4LogicalVolume* plate_logic_vol =
-    new G4LogicalVolume(plate_solid_vol,
-                        G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE"),
-                        plate_name);
+  G4Material* pvt = G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+  pvt->SetMaterialPropertiesTable(OpticalMaterialProperties::PVT());
+
+  G4LogicalVolume* plate_logic_vol = new G4LogicalVolume(plate_solid_vol, pvt, plate_name);
 
   //G4VPhysicalVolume* plate_phys_vol =
     new G4PVPlacement(nullptr, G4ThreeVector(0.,0.,0.),
@@ -80,55 +82,55 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                       false, 0, true);
 
   // DICHROIC FILTER ///////////////////////////////////////
-
-  const G4String filter_name = "DICHROIC_FILTER";
-
-  const G4double filter_width  = 112.0*mm; // X
-  const G4double filter_thickn =   4.0*mm; // Y
-  const G4double filter_length = 491.5*mm; // Z
-
-  G4Box* filter_solid_vol =
-    new G4Box(filter_name, filter_width/2., filter_thickn/2., filter_length/2.);
-
-  G4LogicalVolume* filter_logic_vol =
-    new G4LogicalVolume(filter_solid_vol,
-                        G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE"),
-                        filter_name);
-
-  G4double ypos = plate_thickn/2. + filter_thickn/2. + 4.*mm;
-
-  //G4VPhysicalVolume* filter_phys_vol =
-    new G4PVPlacement(nullptr, G4ThreeVector(0.,ypos,0.),
-                      filter_logic_vol, filter_name, world_logic_vol,
-                      false, 0, true);
-
-  // BACK REFLECTOR ////////////////////////////////////////
-
-  const G4String refl_name = "BACK_REFLECTOR";
-
-  const G4double refl_width  = 112.0*mm; // X
-  const G4double refl_thickn =   4.0*mm; // Y
-  const G4double refl_length = 491.5*mm; // Z
-
-  G4Box* refl_solid_vol =
-    new G4Box(refl_name, refl_width/2., refl_thickn/2., refl_length/2.);
-
-  G4LogicalVolume* refl_logic_vol =
-    new G4LogicalVolume(refl_solid_vol,
-                        G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON"),
-                        refl_name);
-
-  //G4VPhysicalVolume* refl_phys_vol =
-    new G4PVPlacement(nullptr, G4ThreeVector(0.,-ypos,0.),
-                      refl_logic_vol, refl_name, world_logic_vol,
-                      false, 0, true);
+  //
+  // const G4String filter_name = "DICHROIC_FILTER";
+  //
+  // const G4double filter_width  = 112.0*mm; // X
+  // const G4double filter_thickn =   4.0*mm; // Y
+  // const G4double filter_length = 491.5*mm; // Z
+  //
+  // G4Box* filter_solid_vol =
+  //   new G4Box(filter_name, filter_width/2., filter_thickn/2., filter_length/2.);
+  //
+  // G4LogicalVolume* filter_logic_vol =
+  //   new G4LogicalVolume(filter_solid_vol,
+  //                       G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE"),
+  //                       filter_name);
+  //
+  // G4double ypos = plate_thickn/2. + filter_thickn/2. + 4.*mm;
+  //
+  // //G4VPhysicalVolume* filter_phys_vol =
+  //   new G4PVPlacement(nullptr, G4ThreeVector(0.,ypos,0.),
+  //                     filter_logic_vol, filter_name, world_logic_vol,
+  //                     false, 0, true);
+  //
+  // // BACK REFLECTOR ////////////////////////////////////////
+  //
+  // const G4String refl_name = "BACK_REFLECTOR";
+  //
+  // const G4double refl_width  = 112.0*mm; // X
+  // const G4double refl_thickn =   4.0*mm; // Y
+  // const G4double refl_length = 491.5*mm; // Z
+  //
+  // G4Box* refl_solid_vol =
+  //   new G4Box(refl_name, refl_width/2., refl_thickn/2., refl_length/2.);
+  //
+  // G4LogicalVolume* refl_logic_vol =
+  //   new G4LogicalVolume(refl_solid_vol,
+  //                       G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON"),
+  //                       refl_name);
+  //
+  // //G4VPhysicalVolume* refl_phys_vol =
+  //   new G4PVPlacement(nullptr, G4ThreeVector(0.,-ypos,0.),
+  //                     refl_logic_vol, refl_name, world_logic_vol,
+  //                     false, 0, true);
 
   //////////////////////////////////////////////////////////
-  // describing photosensors position 
+  // describing photosensors position
   const G4int nsens = 48; //n SiPMs per arapuca cell
   G4int nsides = 2; // n sides of the sell covered  with SiPMs
   G4double firstPosition = - plate_length/2;
-  G4ThreeVector SiPMpos; 
+  G4ThreeVector SiPMpos;
   G4double Zpos;
   G4double Xpos;
   G4int nsensStart;
@@ -140,32 +142,32 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   const G4double sensSpacing = 10.45*mm;
   for (G4int iside = 0; iside <nsides; iside ++)
-  { 
+  {
     if(iside  == 0)
     {
-      Xpos = plate_width/2 + 6*mm; 
-      rotationMatrix->rotateZ(90.*deg);
+      Xpos = plate_width/2 + 6*mm;
+      rotationMatrix->rotateY(0.*deg);
       nsensStart = 0;
       nsensLast  = nsens/2;
 
     }
     else if(iside  == 1)
     {
-      Xpos = -(plate_width/2+6*mm); 
-      rotationMatrix->rotateZ(-90.*deg);
+      Xpos = -(plate_width/2+6*mm);
+      rotationMatrix->rotateY(270.*deg);
       nsensStart = nsens/2;
       nsensLast  = nsens;
-    } 
+    }
     for (G4int isens = nsensStart; isens<nsensLast; isens++)
     {
       Zpos  = firstPosition + isens * sensSpacing;
-     // Not sure if the sensors shuld be plased in the world logic word 
-     // When putting them in plate_logic_vol it produces overlap errors 
+     // Not sure if the sensors shuld be plased in the world logic word
+     // When putting them in plate_logic_vol it produces overlap errors
       photosens_phys_vol[isens]=
       new G4PVPlacement(rotationMatrix,G4ThreeVector(Xpos,0.,Zpos),
-                        this->GenericPhotosensor(),SiPM_name, world_logic_vol, 
+                        this->GenericPhotosensor(),SiPM_name, world_logic_vol,
                         false, isens, true);
-    }   
+    }
   }
 
   return world_phys_vol;
