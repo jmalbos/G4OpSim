@@ -21,7 +21,6 @@ public:
   virtual void GeneratePrimaries(G4Event*);
 
 private:
-  G4ParticleDefinition* particle_def_;
   G4double kinetic_energy_;
 };
 
