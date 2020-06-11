@@ -27,6 +27,7 @@ int main(int argc, char const *argv[])
   runmgr->SetUserInitialization(new DetectorConstruction());
   runmgr->SetUserAction(new PrimaryGeneration());
   runmgr->SetUserAction(new RunAction());
+  runmgr->SetUserAction(new SteppingAction());
   runmgr->Initialize();
 
   // If no macro file was provided via command line,
