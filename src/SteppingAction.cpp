@@ -21,6 +21,13 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   //Check whether the track is an optical photon
   if (pdef != G4OpticalPhoton::Definition()) return;
 
+  auto step_number = step->GetTrack()->GetCurrentStepNumber();
+  auto volume_name = step->GetTrack()->GetVolume()->GetName();
+
+  G4cout << "step_number: " << step_number << ", volume_name: " << volume_name << G4endl;
+
+  G4cout << counter << G4endl;
+
   /*
   // example of information one can access about optical photons
 
@@ -38,6 +45,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   G4int copy_no = step->GetPostStepPoint()->GetTouchable()->GetReplicaNumber(1);
   */
 
+  /*
   // Retrieve the pointer to the optical boundary process.
   // We do this only once per run defining our local pointer as static.
   static G4OpBoundaryProcess* boundary = 0;
@@ -64,7 +72,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
       // else my_counts_[detector_name] = 1;
     }
   }
-
+  */
   return;
 
 }
