@@ -108,9 +108,8 @@ G4MaterialPropertiesTable* OpticalMaterialProperties::PVT()
   // Absorption length (ABSLENGTH)
   G4double energies_lim[]  = {OpticalMaterialProperties::energy_min,
                               OpticalMaterialProperties::energy_max};
-  G4double abslength[]     = {OpticalMaterialProperties::abslength_max,
-                              OpticalMaterialProperties::abslength_max};
+  G4double abslength[]     = {2.*m, 2.*m};
   mpt->AddProperty("ABSLENGTH", energies_lim, abslength, 2);
-  
+
   return mpt;
 }
