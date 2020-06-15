@@ -19,10 +19,7 @@ public:
   virtual ~SteppingAction();
   virtual void UserSteppingAction(const G4Step*);
 private:
-  G4int counter;
+  int counter;
 };
-
-inline SteppingAction::SteppingAction(): G4UserSteppingAction(), counter(0) {}
-inline SteppingAction::~SteppingAction() {}
 
 #endif

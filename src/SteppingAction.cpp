@@ -14,6 +14,20 @@
 #include <G4VPhysicalVolume.hh>
 
 
+SteppingAction::SteppingAction():
+  G4UserSteppingAction(), counter(0)
+{
+  G4cout << "SteppingAction::SteppingAction" << G4endl;
+}
+
+
+SteppingAction::~SteppingAction()
+{
+  G4cout << "SteppingAction::~SteppingAction" << G4endl;
+  G4cout << "counter: " << counter << G4endl;
+}
+
+
 void SteppingAction::UserSteppingAction(const G4Step* step)
 {
   G4ParticleDefinition* pdef = step->GetTrack()->GetDefinition();
@@ -26,7 +40,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 
   G4cout << "step_number: " << step_number << ", volume_name: " << volume_name << G4endl;
 
-  G4cout << counter << G4endl;
+  if (step_number==3 && volume_name=="WLS_PLATE") ++counter;
 
   /*
   // example of information one can access about optical photons
