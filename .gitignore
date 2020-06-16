@@ -1,2 +1,3 @@
+*.DS_Store
 G4History.macro
 build/
