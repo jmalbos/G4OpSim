@@ -30,7 +30,6 @@ SteppingAction::~SteppingAction()
 
 void SteppingAction::UserSteppingAction(const G4Step* step)
 {
-  /*
   if (step->GetTrack()->GetParentID() == 0) return;
 
   G4ParticleDefinition* pdef = step->GetTrack()->GetDefinition();
@@ -44,7 +43,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   G4cout << "step_number: " << step_number << ", volume_name: " << volume_name << G4endl;
 
   if (step_number==3 && volume_name=="WLS_PLATE") ++counter;
-  */
+
   /*
   // example of information one can access about optical photons
 
