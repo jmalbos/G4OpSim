@@ -44,7 +44,8 @@ void PrimaryGeneration::GeneratePrimaries(G4Event* event)
   G4double py = sint*sinp;
   G4double pz = cost;
 
-  G4ThreeVector momentum(px,py,pz);
+  //G4ThreeVector momentum(px,py,pz);
+  G4ThreeVector momentum(0.,-1.,0.);
 
   // Determine the polarization of the photon
 
@@ -70,7 +71,7 @@ void PrimaryGeneration::GeneratePrimaries(G4Event* event)
   particle->SetPolarization(polarization);
   particle->SetKineticEnergy(kinetic_energy_);
 
-  G4PrimaryVertex* vertex = new G4PrimaryVertex(G4ThreeVector(0.,0.,0.), 0.);
+  G4PrimaryVertex* vertex = new G4PrimaryVertex(G4ThreeVector(0.,10.*cm,0.), 0.);
   vertex->SetPrimary(particle);
 
   event->AddPrimaryVertex(vertex);
