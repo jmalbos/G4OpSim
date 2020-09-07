@@ -48,7 +48,7 @@ G4MaterialPropertiesTable* OpticalMaterialProperties::LAr()
   } while(energy_curr < OpticalMaterialProperties::energy_max);
 
   // Refractive index (RINDEX)
-  // Add here reference to LAr paper
+  // https://arxiv.org/pdf/2002.09346.pdf
   G4double a0  = 0.335;
   G4double aUV = 0.099;
   G4double aIR = 0.008;
@@ -90,7 +90,7 @@ G4MaterialPropertiesTable* OpticalMaterialProperties::PVT()
   } while(energy_curr < 7.5 * eV); // Put 7.5 eV instead of energy_max = 11.3 eV in order to avoid divergence.
 
   // Refractive index (RINDEX)
-  // Add here reference to Sellmeier fit
+  // The refractive index is fitted to a Sellmeier function: https://en.wikipedia.org/wiki/Sellmeier_equation
   G4double A = 1.421;
   G4double B1 = 0.9944;
   G4double C1 = 26250 * pow (nm, 2);
@@ -105,26 +105,205 @@ G4MaterialPropertiesTable* OpticalMaterialProperties::PVT()
 
   mpt->AddProperty("RINDEX", energies.data(), rindex.data(), energies.size());
 
-  // Absorption length (ABSLENGTH)
+  //Absorption length (ABSLENGTH)
+  //assuming just WLS can absorve
   G4double energies_lim[]  = {OpticalMaterialProperties::energy_min,
                               OpticalMaterialProperties::energy_max};
-  G4double abslength[]     = {2.*m, 2.*m};
+  G4double abslength[]     = {OpticalMaterialProperties::abslength_max,
+			      OpticalMaterialProperties::abslength_max};
   mpt->AddProperty("ABSLENGTH", energies_lim, abslength, 2);
 
-  G4double wls_abslength[] = {OpticalMaterialProperties::abslength_max, 0.1*mm, 0.1*mm};
-  G4double wls_energies[]  = {OpticalMaterialProperties::energy_min, 3.3*eV, OpticalMaterialProperties::energy_max};
-  mpt->AddProperty("WLSABSLENGTH", wls_energies, wls_abslength, 3);
+  //WLS absorption WLSABSLENGTH
+  //assuming maximum absorption length for extremal value
+  G4double WLS_abslength[]  = {OpticalMaterialProperties::abslength_max,
+			       OpticalMaterialProperties::abslength_max,
+			       879.673*mm ,406.487*mm ,296.786*mm,165.772*mm,
+			       118.88*mm  ,96.5343*mm ,70.4532*mm,38.5933*mm,
+			       26.714 *mm ,16.9549*mm ,11.2558*mm,9.49174*mm,
+			       8.78259*mm ,7.31249*mm ,6.59717*mm,6.05747*mm,
+			       5.24668*mm ,4.38833*mm ,3.73978*mm,2.71100*mm,
+			       2.1048*mm  ,1.97013*mm ,1.20762*mm,0.71176*mm,
+			       0.803417*mm,0.803417*mm,0.97114*mm,1.63289*mm};
+  G4double WLS_abs_energy[] = {OpticalMaterialProperties::energy_min,
+			       2.90388,
+			       2.9723 *eV,2.98595*eV,2.9987 *eV,3.00867*eV,
+			       3.01317*eV,3.01997*eV,3.02443*eV,3.03555*eV,
+			       3.04441*eV,3.0508*eV ,3.05709*eV,3.06822*eV,
+			       3.07265*eV,3.07916*eV,3.08353*eV,3.08565*eV,
+			       3.09449*eV,3.10326*eV,3.11208*eV,3.12862*eV,
+			       3.14538*eV,3.15101*eV,3.20314*eV,3.25895*eV,
+			       3.27264*eV,3.88859*eV,3.91598*eV,4.01202*eV};
+  G4int WLS_abs_entries = 30;
+  mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_abslength, WLS_abs_entries);
+  
+  // Emision spectrum (WLSCOMPONENT)
+  // from https://arxiv.org/pdf/1912.09191.pdf EJ286
+  G4double WLS_emi_energy[]   = {2.32899*eV,2.38369*eV,2.46565*eV,2.57017*eV,2.61099*eV,
+				 2.64714*eV,2.69664*eV,2.72479*eV,2.77871*eV,2.79583*eV,
+				 2.84050*eV,2.85033*eV,2.86809*eV,2.89408*eV,2.91221*eV,
+				 2.94121*eV,2.97986*eV,2.98148*eV,3.00011*eV,3.01669*eV,
+				 3.01794*eV,3.03617*eV,3.04968*eV,3.04979*eV,3.06040*eV,
+				 3.07350*eV,3.07475*eV,3.08767*eV,3.11679*eV,3.12031*eV};
+  G4double WLS_emi_Spectrum[] = {0.00293557,0.0122252,0.0439192,0.121378,0.166870,
+				 0.23135100,0.3592200,0.4271160,0.539329,0.579575,
+				 0.75539500,0.7947390,0.8865420,0.973837,0.995832,
+				 0.97616000,0.8592200,0.8414600,0.771788,0.658673,
+				 0.63818100,0.5706950,0.4619520,0.442280,0.378345,
+				 0.27670600,0.2562140,0.1865420,0.074247,0.056214};
+  G4int WLS_emi_entries = 30;
+  mpt->AddProperty("WLSCOMPONENT", WLS_emi_energy, WLS_emi_Spectrum, WLS_emi_entries); 
+  
+  //time that the WLS takes to emmit the absorved photon
+  mpt->AddConstProperty("WLSTIMECONSTANT", 1. * ns);
+  //mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 1);
 
-  G4double WLS_emi_energy[]  = {OpticalMaterialProperties::energy_min, 3.2*eV};
-  G4double WLS_emiSpectrum[] = {1., 1.};
-  int WLS_emi_entries = 2;
-  // G4double WLS_emi_energy[186] = {2.29634887996838,2.30483652923832,2.31411697051807,2.32245387325893,2.33085106270994,2.34034703132841,2.34887434769595,2.35617359154163,2.36339217530810,2.37238363370389,2.38109156007801,2.39045812721086,2.39989867642857,2.40941877065123,2.41900997540648,2.42867784501046,2.43842809871660,2.44825212028544,2.45815562076210,2.46814448255125,2.47820990207791,2.48835775399805,2.49858905511557,2.50890991667112,2.51794501935985,2.52716906968784,2.53570865417814,2.54570116888112,2.55500369152655,2.56420471298458,2.57310367388198,2.58312991597720,2.58974578502884,2.59924279380574,2.60667582280547,2.61629763839235,2.61952071469798,2.62975647346963,2.63939239847159,2.64737938664201,2.65509068482286,2.66284703724360,2.67064883991377,2.67849649349760,2.68639040338257,2.69466480839247,2.70382749626279,2.71035972282864,2.71844284412526,2.72657432231462,2.73476062560177,2.74299016490287,2.75161747096506,2.76168895412722,2.77184063318978,2.78065066721068,2.78900854046038,2.79611071262492,2.80597754422627,2.81239427732210,2.81718130421446,2.82132314302547,2.82536770505061,2.83250116781642,2.83643508019973,2.84120668846998,2.84528891009617,2.84965797622328,2.85411933165233,2.85860126989220,2.86309069412850,2.86759424179867,2.87295731165346,2.87574977406997,2.87948374196384,2.88403904975242,2.88844726167284,2.89565971004576,2.89779186278260,2.90530301904773,2.91226472223170,2.92570167211809,2.94051117003143,2.94954344018704,2.95877259907713,2.96617064559140,2.97302100636139,2.98019679569808,2.98507659974122,2.98927305569121,2.99418265259641,2.99973252038429,3.00515729393242,3.00946888529567,3.01473833208464,3.01966580300861,3.02524418488768,3.02970250018093,3.03153250491906,3.03456019344688,3.04038019970405,3.04052188431322,3.04080529315106,3.04469631225847,3.04737576476532,3.05024005114570,3.05311724631259,3.05442617326260,3.05746962342871,3.06110861437504,3.06411238650281,3.06680337612291,3.07290779115198,3.07111880468849,3.07571345907360,3.07846309612938,3.08078118712622,3.08354756660365,3.08659555937299,3.09136001193613,3.09326528291276,3.09661096566483,3.10182545897010,3.10645024634277,3.11241670480351,3.11783359223186,3.12279730740357,3.12911110044206,3.13802996371715,3.14623306830280,3.15484042496375,3.17268431667285,3.18933569965637,3.20616278964998,3.22317676283250,3.24036380369325,3.25773512111079,3.27530234828974,3.29305131639053,3.31099369705092,3.32914160943828,3.34748052036436,3.36602259389756,3.38477122486425,3.40373922969101,3.42291157196373,3.44230112294909,3.46192126266876,3.48175656402095,3.50182047045980,3.52212696391006,3.54266021514925,3.56343427925313,3.58445341757058,3.60573248025495,3.62725508419952,3.64903616769553,3.67109128657338,3.69340362915143,3.71598885240489,3.73886326955439,3.76200962936397,3.78544436096583,3.80917288721418,3.83321262049682,3.85754570721126,3.88218969853889,3.90716290588982,3.93244701247465,3.95806048845963,3.98402261564442,4.01031460530515,4.03695592077182,4.06395357052505,4.09132825447701,4.11906054328327,4.14717135389580,4.17568255453074,4.20457422900815,4.23386849376717,4.26358848632379,4.29371380068625,4.32426785838653,4.35525987783266,4.38671486642297,4.42590000216545};
-  // G4double WLS_emiSpectrum[186] = {0.000189812107209548,0.000189812107209548,0.000189812107209548,0.000210902341343942,0.000231992575478336,0.000231992575478336,0.000253082809612730,0.000295263277881519,0.000316353512015913,0.000337443746150307,0.000379624214419096,0.000442894916822278,0.000485075385091067,0.000569436321628644,0.000611616789897432,0.000695977726435009,0.000780338662972586,0.000843609365375768,0.000949060536047739,0.00105451170671971,0.00115996287739168,0.00128650428219805,0.00141304568700441,0.00153958709181078,0.00170830896488593,0.00181376013555790,0.00198248200863306,0.00215120388170821,0.00231992575478336,0.00244646715958973,0.00263627926679928,0.00274173043747125,0.00301590348121837,0.00312135465189034,0.00337443746150307,0.00352206910044383,0.00377515191005656,0.00400714448553490,0.00434458823168521,0.00474530268023870,0.00512492689465779,0.00552564134321128,0.00592635579176477,0.00634816047445266,0.00676996515714054,0.00723395030809721,0.00763466475665070,0.00807755967347298,0.00847827412202647,0.00892116903884875,0.00934297372153663,0.00974368817009012,0.0101444026186436,0.0105240268330627,0.0108403803450786,0.0111989143253633,0.0115363580715136,0.0119581627542015,0.0123588772027550,0.0126963209489053,0.0130759451633244,0.0133922986753403,0.0137719228897594,0.0141515471041785,0.0145311713185976,0.0149318857671511,0.0153536904498390,0.0157544048983925,0.0162183900493491,0.0166401947320370,0.0170619994147249,0.0174838040974128,0.0179056087801007,0.0182852329945198,0.0186648572089389,0.0190444814233580,0.0194241056377771,0.0197826396180618,0.0201411735983465,0.0204997075786312,0.0209004220271847,0.0210058731978566,0.0209215122613191,0.0205840685151687,0.0203309857055560,0.0199302712570025,0.0194873763401802,0.0190866618916268,0.0186859474430733,0.0182430525262510,0.0178001576094287,0.0173150822243376,0.0168089166051122,0.0161972998152147,0.0156278634935861,0.0150162467036887,0.0143835396796568,0.0137297424214906,0.0133290279729371,0.0129494037585180,0.0119792529883359,0.0124221479051582,0.0117261701787232,0.0113254557301697,0.0109669217498850,0.0106083877696003,0.0101444026186436,0.00970150770182133,0.00927970301913345,0.00881571786817678,0.00835173271722011,0.00786665733212904,0.00693868703021569,0.00738158194703797,0.00651688234752781,0.00609507766483992,0.00577872415282401,0.00527255853359855,0.00480857338264188,0.00438676869995399,0.00398605425140051,0.00354315933457823,0.00299481324708398,0.00250973786199291,0.00208793317930503,0.00164503826248275,0.00126541404806365,0.000843609365375768,0.000506165619225461,0.000295263277881519,8.43609365375768e-05,6.32707024031826e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,2.10902341343942e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,2.10902341343942e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,4.21804682687884e-05,8.43609365375768e-05};
-  // int WLS_emi_entries = 186;
-  mpt->AddProperty("WLSCOMPONENT", WLS_emi_energy, WLS_emiSpectrum, WLS_emi_entries);
+  return mpt;
+}
+
+G4MaterialPropertiesTable* OpticalMaterialProperties::PTP()
+{
+  G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+  
+  // Literature is not very extensive about this material
+  // Refractive index (RINDEX)
+  // https://en.wikipedia.org/wiki/Terphenyl it is not the best reference ever, i know.
+  G4double rindex_energy[] = {OpticalMaterialProperties::energy_min,
+			      OpticalMaterialProperties::energy_max};
+  //TODO: look for RINDEX dependence 
+  G4double rindex[]        = {1.65,1.65};
+  int rindex_entries       = 2;
+
+  mpt->AddProperty("RINDEX", rindex_energy, rindex, rindex_entries);
+
+  // Absorption length (WLSABSLENGTH)
+  // for the moment it is assumed that all LAr photons are absorved and then all emited photons pass through
+    //TODO: look for real spectrum
+  G4double abslength_energy[] = {OpticalMaterialProperties::energy_min, 5.49*eV,
+				 5.5*eV, OpticalMaterialProperties::energy_max}; 
+  G4double abslength[]        = {OpticalMaterialProperties::abslength_max,
+				 OpticalMaterialProperties::abslength_max,
+				 OpticalMaterialProperties::abslength_min,
+				 OpticalMaterialProperties::abslength_min};
+  int abslength_entries       = 4;
+  mpt->AddProperty("WLSABSLENGTH", abslength_energy, abslength, abslength_entries);
+
+  //PTP emision spsectra "WLSCOMPONENT"
+  //https://deepblue.lib.umich.edu/bitstream/handle/2027.42/30880/0000545.pdf;jsessionid=574463A6129BB3C95B63594EBC262D68?sequence=1
+  G4double emi_energy[]   = {3.06894*eV,3.15885*eV,3.21398*eV,3.30108*eV,3.32320*eV,
+			     3.36117*eV,3.41334*eV,3.43137*eV,3.45221*eV,3.46007*eV,
+			     3.47011*eV,3.47800*eV,3.50550*eV,3.51258*eV,3.52198*eV,
+			     3.52792*eV,3.53843*eV,3.55350*eV,3.56298*eV,3.57339*eV,
+			     3.59301*eV,3.60393*eV,3.62111*eV,3.63872*eV,3.64298*eV,
+			     3.65721*eV,3.66756*eV,3.67709*eV,3.68821*eV,3.72512*eV};
+  G4double emi_Spectrum[] = {0.0226077,0.101296,0.199985,0.378345,0.506214,
+			     0.6566240,0.712772,0.752936,0.864903,0.931214,
+			     0.9730180,0.989821,0.966870,0.922608,0.872608,
+			     0.8275260,0.782444,0.738181,0.742280,0.785996,
+			     0.8144110,0.763045,0.681078,0.517143,0.432444,
+			     0.3308040,0.245012,0.170695,0.082170,0.006214};
+  G4int emi_entries = 30;
+  
+  mpt->AddProperty("WLSCOMPONENT", emi_energy, emi_Spectrum, emi_entries);
 
   mpt->AddConstProperty("WLSTIMECONSTANT", 1. * ns);
   //mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 1);
 
+  return mpt;
+}
+
+G4MaterialPropertiesTable* OpticalMaterialProperties::VIKUITI()
+{
+  G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+  //info from David Warner 11/2019 talk
+  //it is said that the reflective foils are coated with TPB,
+  //shall we care about this?
+
+  //reflection  (REFLECTIVITY)
+  //from this talk https://indico.fnal.gov/event/24273/contributions/188657/attachments/130083/158244/DUNE_60Review1.pdf
+  //we can see depedences in angle for large wavelengths > 800 nm.
+  //For shorter wavelength almost no angle dependence, so we are using 60º curves.
+  //We are only considering two options: the photon is either reflected or bulk-absorved.
+  //If we want to consider transmission to the outer world we need to know refractive index.
+  const G4int entries = 50;
+  G4double energy[entries]       = {h_Planck * c_light / (351.408*nm),h_Planck * c_light / (360.963*nm),
+				    h_Planck * c_light / (368.310*nm),h_Planck * c_light / (372.535*nm),
+				    h_Planck * c_light / (375.704*nm),h_Planck * c_light / (376.761*nm),
+				    h_Planck * c_light / (378.873*nm),h_Planck * c_light / (377.817*nm),
+				    h_Planck * c_light / (379.930*nm),h_Planck * c_light / (382.042*nm),
+				    h_Planck * c_light / (383.099*nm),h_Planck * c_light / (385.211*nm),
+				    h_Planck * c_light / (387.621*nm),h_Planck * c_light / (393.662*nm),
+				    h_Planck * c_light / (401.987*nm),h_Planck * c_light / (424.296*nm),
+				    h_Planck * c_light / (451.312*nm),h_Planck * c_light / (476.056*nm),
+				    h_Planck * c_light / (496.127*nm),h_Planck * c_light / (528.873*nm),
+				    h_Planck * c_light / (555.282*nm),h_Planck * c_light / (591.197*nm),
+				    h_Planck * c_light / (632.394*nm),h_Planck * c_light / (665.141*nm),
+				    h_Planck * c_light / (691.231*nm),h_Planck * c_light / (720.826*nm),
+				    h_Planck * c_light / (726.189*nm),h_Planck * c_light / (759.155*nm),
+				    h_Planck * c_light / (796.127*nm),h_Planck * c_light / (837.324*nm),
+				    h_Planck * c_light / (883.803*nm),h_Planck * c_light / (901.460*nm),
+				    h_Planck * c_light / (911.037*nm),h_Planck * c_light / (923.967*nm),
+				    h_Planck * c_light / (925.883*nm),h_Planck * c_light / (933.545*nm),
+				    h_Planck * c_light / (934.981*nm),h_Planck * c_light / (940.845*nm),
+				    h_Planck * c_light / (946.953*nm),h_Planck * c_light / (948.869*nm),
+				    h_Planck * c_light / (957.010*nm),h_Planck * c_light / (958.925*nm),
+				    h_Planck * c_light / (968.503*nm),h_Planck * c_light / (1008.45*nm),
+				    h_Planck * c_light / (1038.03*nm),h_Planck * c_light / (1060.21*nm),
+				    h_Planck * c_light / (1048.59*nm),h_Planck * c_light / (1103.52*nm),
+				    h_Planck * c_light / (1154.23*nm),h_Planck * c_light / (1186.97*nm)};
+								    			  
+  G4double reflectivity[entries] = {0.120930,0.132038,0.125581,0.153488,0.206977,
+				    0.272093,0.479070,0.376744,0.548837,0.623256,
+				    0.702326,0.781395,0.848983,0.932558,0.970015,
+				    0.979070,0.971596,0.983721,0.983721,0.979070,
+				    0.988372,0.986047,0.981395,0.988372,0.970542,
+				    0.969909,0.973705,0.990698,0.990698,0.993023,
+				    0.995349,0.961053,0.912205,0.788151,0.764430,
+				    0.658897,0.638444,0.553488,0.449727,0.420735,
+				    0.310914,0.287368,0.216732,0.186047,0.169767,
+				    0.172093,0.162791,0.167442,0.158140,0.174419};
+
+  mpt->AddProperty("REFLECTIVITY" , energy, reflectivity , entries);
+  
+  return mpt;
+}
+
+G4MaterialPropertiesTable* OpticalMaterialProperties::FusedSilica()
+{
+  G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+  //refractive index RINDEX
+  //data from https://www.filmetrics.com/refractive-index-database/SiO2
+  ///Fused-Silica-Silica-Silicon-Dioxide-Thermal-Oxide-ThermalOxide
+  //it can be seen from https://nvlpubs.nist.gov/nistpubs/jres/75A/jresv75An4p279_A1b.pdf
+  //that there is almost no dependence with temperature.
+  //since PTP emits at 3.45 eV (~360 nm) and WLS emits at 2.9 eV (~430 nm)
+  //no need to go to lower wavelengths
+  G4double energy[] = {h_Planck * c_light / (210*nm) ,h_Planck * c_light / (220*nm),
+		       h_Planck * c_light / (240*nm) ,h_Planck * c_light / (260*nm),
+		       h_Planck * c_light / (280*nm) ,h_Planck * c_light / (300*nm),
+		       h_Planck * c_light / (320*nm) ,h_Planck * c_light / (340*nm),
+		       h_Planck * c_light / (360*nm) ,h_Planck * c_light / (380*nm),
+		       h_Planck * c_light / (400*nm) ,h_Planck * c_light / (420*nm),
+		       h_Planck * c_light / (440*nm) ,h_Planck * c_light / (460*nm),
+		       h_Planck * c_light / (480*nm) ,h_Planck * c_light / (500*nm),
+		       h_Planck * c_light / (520*nm) ,h_Planck * c_light / (540*nm),
+		       h_Planck * c_light / (560*nm) ,h_Planck * c_light / (580*nm),
+		       h_Planck * c_light / (600*nm) ,h_Planck * c_light / (650*nm),
+		       h_Planck * c_light / (700*nm) ,h_Planck * c_light / (750*nm),
+		       h_Planck * c_light / (800*nm) ,h_Planck * c_light / (850*nm),
+		       h_Planck * c_light / (900*nm) ,h_Planck * c_light / (1000*nm),
+		       h_Planck * c_light / (1100*nm),h_Planck * c_light / (1200*nm)}; 
+  G4double rindex[] = {1.5384,1.5285,1.5133,1.5024,1.4942,
+		       1.4878,1.4827,1.4787,1.4753,1.4725,
+		       1.4701,1.4681,1.4663,1.4648,1.4635,
+		       1.4623,1.4613,1.4603,1.4595,1.4587,
+		       1.4580,1.4565,1.4553,1.4542,1.4533,
+		       1.4525,1.4518,1.4504,1.4492,1.4481};
+  G4int entries = 30;
+
+  mpt->AddProperty("RINDEX", energy, rindex, entries);
+  
+  //data for the dichroic filter is stored in /data/dichroic_data
+  
+  
   return mpt;
 }

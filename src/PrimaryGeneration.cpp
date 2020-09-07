@@ -19,7 +19,7 @@
 
 PrimaryGeneration::PrimaryGeneration():
   G4VUserPrimaryGeneratorAction(),
-  kinetic_energy_(6.*eV)
+  kinetic_energy_(6*eV)
 {
 }
 
@@ -45,7 +45,8 @@ void PrimaryGeneration::GeneratePrimaries(G4Event* event)
   G4double pz = cost;
 
   //G4ThreeVector momentum(px,py,pz);
-  G4ThreeVector momentum(0.,-1.,0.);
+  G4ThreeVector momentum(0.,-1,0.);
+  //G4ThreeVector momentum(0.,-0.99,sqrt(1-0.99*0.99));
 
   // Determine the polarization of the photon
 

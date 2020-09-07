@@ -28,6 +28,12 @@ namespace OpticalMaterialProperties {
 
   G4MaterialPropertiesTable* PVT();
 
+  G4MaterialPropertiesTable* PTP();
+
+  G4MaterialPropertiesTable* VIKUITI();
+
+  G4MaterialPropertiesTable* FusedSilica();
+
 } // end namespace
 
 #endif
