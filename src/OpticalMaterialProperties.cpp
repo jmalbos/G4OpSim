@@ -11,6 +11,8 @@
 
 #include <CLHEP/Units/PhysicalConstants.h>
 
+#include <cassert>
+
 using CLHEP::h_Planck;
 using CLHEP::c_light;
 
@@ -305,5 +307,55 @@ G4MaterialPropertiesTable* OpticalMaterialProperties::FusedSilica()
   //data for the dichroic filter is stored in /data/dichroic_data
   
   
+  return mpt;
+}
+
+G4MaterialPropertiesTable* OpticalMaterialProperties::GlassEpoxy()
+{
+  // Optical properties of Optorez 1330 glass epoxy.
+  // Obtained from http://refractiveindex.info and
+  // https://www.zeonex.com/Optics.aspx.html#glass-like
+  G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+  // REFRACTIVE INDEX
+  // The range is chosen to be up to ~10.7 eV because Sellmeier's equation
+  // for fused silica is valid only in that range
+  const G4int ri_entries = 200;
+  G4double eWidth = 
+    (OpticalMaterialProperties::energy_max - OpticalMaterialProperties::energy_min) / ri_entries;
+  G4double ri_energy[ri_entries];
+  for (int i = 0; i < ri_entries; i++){
+    ri_energy[i] = OpticalMaterialProperties::energy_min + i * eWidth;
+  }
+  G4double rIndex[ri_entries];
+  for (int i = 0; i < ri_entries; i++) {
+    G4double lambda = h_Planck*c_light/ri_energy[i]*1000; // in micron
+    G4double n2 = 2.291142 - 3.311944E-2*pow(lambda,2) - 1.630099E-2*pow(lambda,-2) +
+      7.265983E-3*pow(lambda,-4) - 6.806145E-4*pow(lambda,-6) +
+      1.960732E-5*pow(lambda,-8);
+    rIndex[i] = sqrt(n2);
+    // G4cout << "* GlassEpoxy rIndex:  " << std::setw(5)
+    //        << ri_energy[i]/eV << " eV -> " << rIndex[i] << G4endl;
+  }
+  assert(sizeof(rIndex) == sizeof(ri_energy));
+  mpt->AddProperty("RINDEX", ri_energy, rIndex, ri_entries);
+  // ABSORPTION LENGTH
+  G4double abs_energy[] = {
+    OpticalMaterialProperties::energy_max, 
+    2.001 * eV,   2.132 * eV,   2.735 * eV,  2.908 * eV,
+    3.119 * eV,   3.320 * eV,   3.476 * eV,  3.588 * eV,  
+    3.749 * eV,   3.869 * eV,   3.973 * eV,  4.120 * eV,  
+    4.224 * eV,   4.320 * eV,   4.420 * eV,  5.018 * eV
+  };
+  const G4int abs_entries = sizeof(abs_energy) / sizeof(G4double);
+  G4double absLength[] = {
+    OpticalMaterialProperties::abslength_max,
+    OpticalMaterialProperties::abslength_max,
+                  326.00 * mm,  117.68 * mm,  85.89 * mm,  
+    50.93 * mm,   31.25 * mm ,   17.19 * mm,  10.46 * mm,   
+    5.26 * mm ,   3.77 * mm  ,    2.69 * mm,   1.94 * mm,
+    1.33 * mm ,   0.73 * mm  ,    0.32 * mm,   0.10 * mm
+  };
+  assert(sizeof(absLength) == sizeof(abs_energy));
+  mpt->AddProperty("ABSLENGTH", abs_energy, absLength, abs_entries);
   return mpt;
 }

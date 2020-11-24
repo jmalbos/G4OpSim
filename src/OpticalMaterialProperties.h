@@ -34,6 +34,8 @@ namespace OpticalMaterialProperties {
 
   G4MaterialPropertiesTable* FusedSilica();
 
+  G4MaterialPropertiesTable* GlassEpoxy();
+
 } // end namespace
 
 #endif
