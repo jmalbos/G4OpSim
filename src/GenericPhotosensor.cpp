@@ -6,6 +6,7 @@
 // -----------------------------------------------------------------------------
 
 #include "GenericPhotosensor.h"
+#include "OpticalMaterialProperties.h"
 
 #include "Materials.h"
 #include "OpticalSD.h"
@@ -54,12 +55,15 @@ void GenericPhotosensor::Construct()
 
   G4double window_thickness = thickness_/4.;
 
+  G4Material* OpSil = Materials::OpticalSilicone();
+  OpSil->SetMaterialPropertiesTable(OpticalMaterialProperties::GlassEpoxy());
+
   G4Box* window_solid_vol =
     new G4Box(name, width_/2., height_/2., window_thickness/2.);
 
   G4LogicalVolume* window_logic_vol =
     new G4LogicalVolume(window_solid_vol,
-                        Materials::OpticalSilicone(),
+                        OpSil,
                         name);
 
   G4double zpos = thickness_/2. - window_thickness/2.;
