@@ -35,6 +35,7 @@ DetectorConstruction::DetectorConstruction():
   plate_width_ (112.0*mm), // X
   plate_thickn_(  4.0*mm), // Y
   plate_length_(491.5*mm), // Z
+  foil_thickn_(0.165*mm),
   num_phsensors(48)
 {
 }
@@ -70,6 +71,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   ConstructWLSPlate(world_phys_vol);
   ConstructPhotosensors(world_phys_vol);
+  ConstructReflectiveFoils(world_phys_vol);
 
   return world_phys_vol;
 }
@@ -122,9 +124,26 @@ void DetectorConstruction::ConstructPhotosensors(G4VPhysicalVolume* world_phys_v
 
     G4ThreeVector pos(-plate_width_/2. - 1.*mm,
                       0.,
-                      -plate_length_/2. + i * plate_length_/(num_phsensors/2));
+                      -plate_length_/2. + (0.5 + i) * plate_length_/(num_phsensors/2));
 
     new G4PVPlacement(rot, pos,
+                      photosensor_logic_vol, photosensor_logic_vol->GetName(),
+                      world_phys_vol->GetLogicalVolume(),
+                      false, phsensor_id, true);
+  }
+
+  G4RotationMatrix* rot2 = new G4RotationMatrix();
+  rot2->rotateY(90*deg);
+
+  for (G4int i=0; i<num_phsensors/2; ++i) {
+
+    phsensor_id = i;
+
+    G4ThreeVector pos(+plate_width_/2. + 1.*mm,
+                      0.,
+                      -plate_length_/2. + (0.5 + i) * plate_length_/(num_phsensors/2));
+
+    new G4PVPlacement(rot2, pos,
                       photosensor_logic_vol, photosensor_logic_vol->GetName(),
                       world_phys_vol->GetLogicalVolume(),
                       false, phsensor_id, true);
@@ -176,10 +195,66 @@ void DetectorConstruction::ConstructPhotosensors(G4VPhysicalVolume* world_phys_v
   //
   // return world_phys_vol;
 
-
-
 }
 
+void DetectorConstruction::ConstructReflectiveFoils(G4VPhysicalVolume* world_phys_vol) const
+{
+  // REFLECTIVE FOILS ///////////////////////////////////////////////////////
+
+  Assert(world_phys_vol, "DetectorConstruction::ConstructWLSPlate()");
+  
+  //there are three reflective foils, one in the bottom, two in the sides
+  //first create the logical volume and then create the surface with LAr
+  const G4String bottom_foil_name = "REF_BOTTOM_FOIL";
+  const G4String side_foil_name   = "REF_SIDE_FOIL";
+  
+  //for the moment, same area as WLS plate. Should be checked.
+  //thickness from manufacturer, should be checked.
+  //https://www.isoltronic.ch/assets/of-m-vikuiti-esr-app-guide.pdf
+  
+  G4Box* bottom_foil_solid_vol =
+    new G4Box(bottom_foil_name, plate_width_/2.,
+	      foil_thickn_/2., plate_length_/2.);
+  
+  G4Box* side_foil_solid_vol =
+    new G4Box(side_foil_name, plate_width_/2.,
+	      plate_thickn_/2., foil_thickn_/2.);
+  
+  G4Material* plexiglass = G4NistManager::Instance()->FindOrBuildMaterial("G4_PLEXIGLASS");
+  
+  G4LogicalVolume* bottom_foil_logic_vol = new
+    G4LogicalVolume(bottom_foil_solid_vol, plexiglass, bottom_foil_name);
+  
+  G4LogicalVolume* side_foil_logic_vol = new
+    G4LogicalVolume(side_foil_solid_vol, plexiglass, side_foil_name);
+  
+  //the position is still unknown. For the moment put 1mm, should be checked
+  G4ThreeVector bottom_foil_pos(0, -plate_thickn_/2 - foil_thickn_/2 - 1*mm, 0);
+  new G4PVPlacement(nullptr, bottom_foil_pos,
+		    bottom_foil_logic_vol, bottom_foil_name, 
+		    world_phys_vol->GetLogicalVolume(),
+		    false, 0, true);
+  
+  G4ThreeVector side_foil_pos(0, 0, plate_length_/2 + foil_thickn_/2 + 1*mm);
+  new G4PVPlacement(nullptr, side_foil_pos,
+	      side_foil_logic_vol, side_foil_name, 
+	      world_phys_vol->GetLogicalVolume(),
+	      false, 0, true);
+  
+  new G4PVPlacement(nullptr, -side_foil_pos,
+		    side_foil_logic_vol, side_foil_name, 
+		    world_phys_vol->GetLogicalVolume(),
+		    false, 0, true);
+ 
+  //now create the surface
+  const G4String refsurf_name = "REF_SURFACE";
+  G4OpticalSurface* refsurf_opsurf = new
+    G4OpticalSurface(refsurf_name, unified, polishedfrontpainted, dielectric_dielectric, 1);
+  
+  refsurf_opsurf->SetMaterialPropertiesTable(OpticalMaterialProperties::VIKUITI());
+  new G4LogicalSkinSurface("REF_FOIL_SURFACE",bottom_foil_logic_vol,refsurf_opsurf);
+  new G4LogicalSkinSurface("REF_FOIL_SURFACE",side_foil_logic_vol,refsurf_opsurf);
+}
 
 void DetectorConstruction::Assert(G4VPhysicalVolume* ptr, const G4String& origin) const
 {
