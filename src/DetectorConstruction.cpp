@@ -213,20 +213,18 @@ void DetectorConstruction::ConstructReflectiveFoils(G4VPhysicalVolume* world_phy
   //https://www.isoltronic.ch/assets/of-m-vikuiti-esr-app-guide.pdf
   
   G4Box* bottom_foil_solid_vol =
-    new G4Box(bottom_foil_name, plate_width_/2.,
-	      foil_thickn_/2., plate_length_/2.);
+    new G4Box(bottom_foil_name, plate_width_/2. ,foil_thickn_/2., plate_length_/2.);
   
   G4Box* side_foil_solid_vol =
-    new G4Box(side_foil_name, plate_width_/2.,
-	      plate_thickn_/2., foil_thickn_/2.);
+    new G4Box(side_foil_name, plate_width_/2., plate_thickn_/2., foil_thickn_/2.);
   
   G4Material* plexiglass = G4NistManager::Instance()->FindOrBuildMaterial("G4_PLEXIGLASS");
   
-  G4LogicalVolume* bottom_foil_logic_vol = new
-    G4LogicalVolume(bottom_foil_solid_vol, plexiglass, bottom_foil_name);
+  G4LogicalVolume* bottom_foil_logic_vol = 
+    new G4LogicalVolume(bottom_foil_solid_vol, plexiglass, bottom_foil_name);
   
-  G4LogicalVolume* side_foil_logic_vol = new
-    G4LogicalVolume(side_foil_solid_vol, plexiglass, side_foil_name);
+  G4LogicalVolume* side_foil_logic_vol = 
+    new G4LogicalVolume(side_foil_solid_vol, plexiglass, side_foil_name);
   
   //the position is still unknown. For the moment put 1mm, should be checked
   G4ThreeVector bottom_foil_pos(0, -plate_thickn_/2 - foil_thickn_/2 - 1*mm, 0);
@@ -248,8 +246,8 @@ void DetectorConstruction::ConstructReflectiveFoils(G4VPhysicalVolume* world_phy
  
   //now create the surface
   const G4String refsurf_name = "REF_SURFACE";
-  G4OpticalSurface* refsurf_opsurf = new
-    G4OpticalSurface(refsurf_name, unified, polishedfrontpainted, dielectric_dielectric, 1);
+  G4OpticalSurface* refsurf_opsurf = 
+    new G4OpticalSurface(refsurf_name, unified, polishedfrontpainted, dielectric_dielectric, 1);
   
   refsurf_opsurf->SetMaterialPropertiesTable(OpticalMaterialProperties::VIKUITI());
   new G4LogicalSkinSurface("REF_FOIL_SURFACE",bottom_foil_logic_vol,refsurf_opsurf);

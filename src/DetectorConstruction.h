@@ -30,7 +30,8 @@ private:
 
 private:
   const G4double world_size_;
-  const G4double plate_width_, plate_thickn_, plate_length_, foil_thickn_;
+  const G4double plate_width_, plate_thickn_, plate_length_;
+  const G4double foil_thickn_;
   const G4int num_phsensors;
 };
 
