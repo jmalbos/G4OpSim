@@ -31,12 +31,16 @@
 
 DetectorConstruction::DetectorConstruction():
   G4VUserDetectorConstruction(),
-  world_size_(10.*m),
-  plate_width_ (112.0*mm), // X
-  plate_thickn_(  4.0*mm), // Y
-  plate_length_(491.5*mm), // Z
-  foil_thickn_(0.165*mm),
-  num_phsensors(48)
+  world_size_   (10.*m),
+  plate_width_  (112.0*mm), // X
+  plate_thickn_ (  4.0*mm), // Y
+  plate_length_ (491.5*mm), // Z
+  foil_thickn_  (0.165*mm), // Z&X
+  foil_gap_     (1.*mm),
+  filter_thickn_(1.*mm),    // Y
+  filter_gap_   (1.5*mm),
+  ptp_thickn_   (0.002*mm), // Y
+  num_phsensors (48)
 {
 }
 
@@ -72,6 +76,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   ConstructWLSPlate(world_phys_vol);
   ConstructPhotosensors(world_phys_vol);
   ConstructReflectiveFoils(world_phys_vol);
+  ConstructDichroicFilter(world_phys_vol);
+  ConstructPTPLayer(world_phys_vol);
 
   return world_phys_vol;
 }
@@ -227,13 +233,13 @@ void DetectorConstruction::ConstructReflectiveFoils(G4VPhysicalVolume* world_phy
     new G4LogicalVolume(side_foil_solid_vol, plexiglass, side_foil_name);
   
   //the position is still unknown. For the moment put 1mm, should be checked
-  G4ThreeVector bottom_foil_pos(0, -plate_thickn_/2 - foil_thickn_/2 - 1*mm, 0);
+  G4ThreeVector bottom_foil_pos(0, -plate_thickn_/2 - foil_thickn_/2 - foil_gap_, 0);
   new G4PVPlacement(nullptr, bottom_foil_pos,
 		    bottom_foil_logic_vol, bottom_foil_name, 
 		    world_phys_vol->GetLogicalVolume(),
 		    false, 0, true);
   
-  G4ThreeVector side_foil_pos(0, 0, plate_length_/2 + foil_thickn_/2 + 1*mm);
+  G4ThreeVector side_foil_pos(0, 0, plate_length_/2 + foil_thickn_/2 + foil_gap_);
   new G4PVPlacement(nullptr, side_foil_pos,
 	      side_foil_logic_vol, side_foil_name, 
 	      world_phys_vol->GetLogicalVolume(),
@@ -252,6 +258,62 @@ void DetectorConstruction::ConstructReflectiveFoils(G4VPhysicalVolume* world_phy
   refsurf_opsurf->SetMaterialPropertiesTable(OpticalMaterialProperties::VIKUITI());
   new G4LogicalSkinSurface("REF_FOIL_SURFACE",bottom_foil_logic_vol,refsurf_opsurf);
   new G4LogicalSkinSurface("REF_FOIL_SURFACE",side_foil_logic_vol,refsurf_opsurf);
+}
+
+void DetectorConstruction::ConstructDichroicFilter(G4VPhysicalVolume* world_phys_vol) const
+{
+  // DICHROIC FILTER ///////////////////////////////////////
+  const G4String filter_name = "DICHROIC_FILTER";
+  
+  //dimensions should be checked
+  //1.5*mm from https://indico.fnal.gov/event/45283/contributions/195721/attachments/133823/165234/X-ARAPUCA_Cuts_Study.pdf
+  //and 1*mm is the assumed filter width
+  G4Box* filter_solid_vol =
+    new G4Box(filter_name, plate_width_/2., filter_thickn_/2., plate_length_/2.);
+  
+  G4Material* filter_material = G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
+  filter_material->SetMaterialPropertiesTable(OpticalMaterialProperties::FusedSilica());
+  
+  G4LogicalVolume* filter_logic_vol =
+    new G4LogicalVolume(filter_solid_vol,filter_material,filter_name);
+  
+  G4ThreeVector filter_pos(0, plate_thickn_/2 + filter_gap_ + filter_thickn_/2, 0);
+  new G4PVPlacement(nullptr, filter_pos,
+		    filter_logic_vol, filter_name, 
+		    world_phys_vol->GetLogicalVolume(),
+		    false, 0, true);
+		      
+  //now create the surface. It is a dichroic filter, so we need more things
+  setenv("G4DICHROICDATA","data/dichroic_data",1);
+  const G4String filtersurf_name = "FILTER_SURFACE";
+  G4OpticalSurface* filtersurf_opsurf = 
+    new G4OpticalSurface(filtersurf_name, dichroic, polished, dielectric_dichroic, 1);
+  
+  filtersurf_opsurf->SetMaterialPropertiesTable(OpticalMaterialProperties::FusedSilica());
+  new G4LogicalSkinSurface("FILTER_SURFACE",filter_logic_vol,filtersurf_opsurf);
+}
+
+void DetectorConstruction::ConstructPTPLayer(G4VPhysicalVolume* world_phys_vol) const
+{
+  // PTP LAYER ///////////////////////////////////////
+  const G4String ptp_name = "PTP_LAYER";
+  
+  //real dimensions not known. To be reviewed
+  G4Box* ptp_solid_vol =
+    new G4Box(ptp_name, plate_width_/2., ptp_thickn_/2., plate_length_/2.);
+  
+  G4Material* ptp = G4NistManager::Instance()->FindOrBuildMaterial("G4_TERPHENYL");
+  ptp->SetMaterialPropertiesTable(OpticalMaterialProperties::PTP());
+  
+  G4LogicalVolume* ptp_logic_vol = new G4LogicalVolume(ptp_solid_vol, ptp, ptp_name);
+  
+  //position still not known, to be reviewed
+  G4ThreeVector ptp_pos(0, plate_thickn_/2 + filter_gap_ + filter_thickn_/2 + ptp_thickn_/2, 0);  
+  new G4PVPlacement(nullptr, ptp_pos,
+		    ptp_logic_vol, ptp_name, 
+		    world_phys_vol->GetLogicalVolume(),
+		    false, 0, true);
+  
 }
 
 void DetectorConstruction::Assert(G4VPhysicalVolume* ptr, const G4String& origin) const
