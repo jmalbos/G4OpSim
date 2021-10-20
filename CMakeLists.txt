@@ -23,6 +23,10 @@ else()
   find_package(Geant4 REQUIRED)
 endif()
 
+## Locate ROOT and define a number of useful targets and variables
+find_package(ROOT REQUIRED)
+include(${ROOT_USE_FILE})
+
 ## Setup Geant4 include directories and compile definitions.
 include(${Geant4_USE_FILE})
 
@@ -31,4 +35,4 @@ add_subdirectory(src)
 
 add_executable(G4OpSim G4OpSim.cpp $<TARGET_OBJECTS:${CMAKE_PROJECT_NAME}_SRC>)
 target_include_directories(G4OpSim PRIVATE ${CMAKE_SOURCE_DIR}/src)
-target_link_libraries(G4OpSim ${Geant4_LIBRARIES})
+target_link_libraries(G4OpSim ${Geant4_LIBRARIES} ROOT::Hist)
