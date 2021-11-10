@@ -9,7 +9,7 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(G4OPSIM)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ## Find Geant4 package, activating all available UI and Vis
@@ -27,6 +27,9 @@ endif()
 find_package(ROOT REQUIRED)
 include(${ROOT_USE_FILE})
 
+message("ROOT include directories: ${ROOT_INCLUDE_DIRS}")
+message("ROOT libraries: ${ROOT_LIBRARIES}") 
+
 ## Setup Geant4 include directories and compile definitions.
 include(${Geant4_USE_FILE})
 
@@ -35,4 +38,4 @@ add_subdirectory(src)
 
 add_executable(G4OpSim G4OpSim.cpp $<TARGET_OBJECTS:${CMAKE_PROJECT_NAME}_SRC>)
 target_include_directories(G4OpSim PRIVATE ${CMAKE_SOURCE_DIR}/src)
-target_link_libraries(G4OpSim ${Geant4_LIBRARIES} ROOT::Hist)
+target_link_libraries(G4OpSim ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
