@@ -96,7 +96,7 @@ void GenericPhotosensor::Construct()
 
   name = "PHOTOSENSOR_OPSURF";
 
-  G4double energy[]       = {3.875*eV, 3.836*eV, 3.815*eV, 3.794*eV, 3.773*eV, 
+  G4double energy[]       = {OpticalMaterialProperties::energy_max, 3.875*eV, 3.836*eV, 3.815*eV, 3.794*eV, 3.773*eV, 
                             3.752*eV, 3.732*eV, 3.721*eV, 3.687*eV, 3.701*eV, 3.672*eV, 
                             3.652*eV, 3.672*eV, 3.642*eV, 3.613*eV, 3.623*eV, 3.594*eV, 
                             3.613*eV, 3.585*eV, 3.563*eV, 3.539*eV, 3.521*eV, 3.503*eV, 
@@ -112,9 +112,9 @@ void GenericPhotosensor::Construct()
                             1.826*eV, 1.797*eV, 1.774*eV, 1.754*eV, 1.734*eV, 1.714*eV, 
                             1.683*eV, 1.66*eV, 1.641*eV, 1.619*eV, 1.602*eV, 1.578*eV, 
                             1.557*eV, 1.536*eV, 1.515*eV, 1.499*eV, 1.475*eV, 1.454*eV, 
-                            1.436*eV, 1.418*eV, 1.401*eV, 1.382*eV};
+                            1.436*eV, 1.418*eV, 1.401*eV, 1.382*eV, OpticalMaterialProperties::energy_min};
 
-  G4double reflectivity[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+  G4double reflectivity[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
@@ -122,9 +122,9 @@ void GenericPhotosensor::Construct()
                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
                             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
-                            0.0, 0.0, 0.0};
+                            0.0, 0.0, 0.0, 0.0};
 
-  G4double efficiency[]   = {0.026, 0.037, 0.046, 0.055, 0.068, 0.08, 0.09, 0.099, 0.119, 
+  G4double efficiency[]   = {0.0, 0.026, 0.037, 0.046, 0.055, 0.068, 0.08, 0.09, 0.099, 0.119, 
                             0.108, 0.13, 0.143, 0.135, 0.154, 0.17, 0.163, 0.182, 0.176, 
                             0.19, 0.2, 0.209, 0.217, 0.225, 0.234, 0.245, 0.239, 0.256, 
                             0.267, 0.278, 0.29, 0.302, 0.312, 0.323, 0.335, 0.329, 0.345, 
@@ -134,12 +134,12 @@ void GenericPhotosensor::Construct()
                             0.266, 0.259, 0.252, 0.247, 0.241, 0.233, 0.225, 0.219, 0.211, 
                             0.206, 0.2, 0.191, 0.183, 0.176, 0.169, 0.159, 0.152, 0.145, 
                             0.139, 0.132, 0.122, 0.114, 0.108, 0.101, 0.096, 0.088, 0.082, 
-                            0.076, 0.071, 0.066, 0.059, 0.053, 0.048, 0.044, 0.039, 0.035};
+                            0.076, 0.071, 0.066, 0.059, 0.053, 0.048, 0.044, 0.039, 0.035, 0.0};
 
 
   G4MaterialPropertiesTable* photosensor_mpt = new G4MaterialPropertiesTable();
-  photosensor_mpt->AddProperty("REFLECTIVITY", energy, reflectivity, 2);
-  photosensor_mpt->AddProperty("EFFICIENCY",   energy, efficiency,   2);
+  photosensor_mpt->AddProperty("REFLECTIVITY", energy, reflectivity, 101);
+  photosensor_mpt->AddProperty("EFFICIENCY",   energy, efficiency,   101);
 
   G4OpticalSurface* photosensor_opsurf =
     new G4OpticalSurface(name, unified, polished, dielectric_metal);
