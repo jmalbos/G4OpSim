@@ -28,6 +28,8 @@ namespace OpticalMaterialProperties {
 
   G4MaterialPropertiesTable* PVT();
 
+  G4MaterialPropertiesTable* BC418();
+
   G4MaterialPropertiesTable* PTP();
 
   G4MaterialPropertiesTable* VIKUITI();
