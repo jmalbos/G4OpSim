@@ -21,7 +21,7 @@ public:
   virtual void EndOfRunAction(const G4Run*);
 };
 
-inline RunAction::RunAction() {}
-inline RunAction::~RunAction() {}
+//inline RunAction::RunAction() {}
+//inline RunAction::~RunAction() {}
 
 #endif

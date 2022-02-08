@@ -294,18 +294,22 @@ G4MaterialPropertiesTable* OpticalMaterialProperties::FusedSilica()
 		       h_Planck * c_light / (800*nm) ,h_Planck * c_light / (850*nm),
 		       h_Planck * c_light / (900*nm) ,h_Planck * c_light / (1000*nm),
 		       h_Planck * c_light / (1100*nm),h_Planck * c_light / (1200*nm)}; 
-  G4double rindex[] = {1.5384,1.5285,1.5133,1.5024,1.4942,
+  /*G4double rindex[] = {1.5384,1.5285,1.5133,1.5024,1.4942,
 		       1.4878,1.4827,1.4787,1.4753,1.4725,
 		       1.4701,1.4681,1.4663,1.4648,1.4635,
 		       1.4623,1.4613,1.4603,1.4595,1.4587,
 		       1.4580,1.4565,1.4553,1.4542,1.4533,
-		       1.4525,1.4518,1.4504,1.4492,1.4481};
+		       1.4525,1.4518,1.4504,1.4492,1.4481};*/
+  G4double rindex[] = {1.,1.,1.,1.,1.,
+		       1.,1.,1.,1.,1.,
+		       1.,1.,1.,1.,1.,
+		       1.,1.,1.,1.,1.,
+		       1.,1.,1.,1.,1.,
+		       1.,1.,1.,1.,1.};
+
   G4int entries = 30;
 
-  mpt->AddProperty("RINDEX", energy, rindex, entries);
-  
-  //data for the dichroic filter is stored in /data/dichroic_data
-  
+  mpt->AddProperty("RINDEX", energy, rindex, entries);  
   
   return mpt;
 }
