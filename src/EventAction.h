@@ -8,8 +8,10 @@
 #define EVENT_ACTION_H
 
 #include <G4UserEventAction.hh>
+#include <globals.hh>
 
 class G4Event;
+class G4Step;
 
 
 class EventAction: public G4UserEventAction
@@ -19,9 +21,12 @@ public:
   virtual ~EventAction();
   virtual void BeginOfEventAction(const G4Event*);
   virtual void EndOfEventAction(const G4Event*);
+
+private:
+	G4double fInitEnerg;
 };
 
-inline EventAction::EventAction() {}
-inline EventAction::~EventAction() {}
+//inline EventAction::EventAction() {}
+//inline EventAction::~EventAction() {}
 
 #endif
