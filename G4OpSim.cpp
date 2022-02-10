@@ -30,13 +30,15 @@ int main(int argc, char const *argv[])
   runmgr->SetUserAction(new SteppingAction());
   runmgr->Initialize();
 
+  G4UImanager * UI = G4UImanager::GetUIpointer();
+  UI->ApplyCommand("/process/optical/boundary/setInvokeSD true");
+
   // If no macro file was provided via command line,
   // start an interactive session.
   if (argc == 1) {
     G4VisManager* vismgr = new G4VisExecutive();
     vismgr->Initialize();
-    G4UImanager::GetUIpointer()->
-      ApplyCommand("/control/execute mac/vis.mac");
+    UI->ApplyCommand("/control/execute mac/vis.mac");
     G4UIsession* session = new G4UIterminal(new G4UItcsh);
     session->SessionStart();
     delete session;
@@ -46,7 +48,7 @@ int main(int argc, char const *argv[])
   // of a valid macro file. Any other argument will be ignored.
   else {
     G4String command = "/control/execute " + std::string(argv[1]);
-    G4UImanager::GetUIpointer()->ApplyCommand(command);
+    UI->ApplyCommand(command);
   }
 
   // Job termination
