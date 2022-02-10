@@ -89,7 +89,7 @@ void DetectorConstruction::ConstructWLSPlate(G4VPhysicalVolume* world_phys_vol) 
     new G4Box(plate_name, plate_width_/2., plate_thickn_/2., plate_length_/2.);
 
   G4Material* pvt = G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
-  pvt->SetMaterialPropertiesTable(OpticalMaterialProperties::PVT());
+  pvt->SetMaterialPropertiesTable(OpticalMaterialProperties::BC418());
 
   G4LogicalVolume* plate_logic_vol =
     new G4LogicalVolume(plate_solid_vol, pvt, plate_name);
