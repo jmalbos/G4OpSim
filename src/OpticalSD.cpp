@@ -32,6 +32,7 @@ void OpticalSD::Initialize(G4HCofThisEvent* hce)
 
 G4bool OpticalSD::ProcessHits(G4Step* aStep, G4TouchableHistory*)
 {
+  return false;
 }
 
 
