@@ -239,6 +239,35 @@ G4MaterialPropertiesTable* OpticalMaterialProperties::BC418()
   return mpt;
 }
 
+G4MaterialPropertiesTable * OpticalMaterialProperties::EJ286()
+{
+  //REMEMBER: For the moment, this EJ286 has infinite absorption length!
+  //eljentechnology.com/products/wavelength-shifting-plastics/ej-280-ej-282-ej-284-ej-286
+  G4MaterialPropertiesTable * mpt = new G4MaterialPropertiesTable();
+
+  Reader * pReader = Reader::getInstance();
+  G4String filepath;
+  
+  filepath = "./data/wlsbar_rindex.csv";
+  std::vector<G4double> rindex_energy, rindex;
+  G4int rindex_entries = pReader->ReadTwoColumnsCsv(filepath, rindex_energy, rindex, eV, 1.);
+  mpt->AddProperty("RINDEX", rindex_energy.data(), rindex.data(), rindex_entries);
+
+  filepath = "./data/EJ286_wlsabslength.csv";
+  std::vector<G4double> wlsabslength_energy, wlsabslength;
+  G4int wlsabslength_entries = pReader->ReadTwoColumnsCsv(filepath, wlsabslength_energy, wlsabslength, eV, mm);
+  mpt->AddProperty("WLSABSLENGTH", wlsabslength_energy.data(), wlsabslength.data(), wlsabslength_entries);
+
+  filepath = "./data/EJ286_emission.csv";
+  std::vector<G4double> emission_energy, emission;
+  G4int emission_entries = pReader->ReadTwoColumnsCsv(filepath, emission_energy, emission, eV, 1.);
+  mpt->AddProperty("WLSCOMPONENT", emission_energy.data(), emission.data(), emission_entries);
+
+  mpt->AddConstProperty("WLSTIMECONSTANT", 1.2 *ns);
+
+  return mpt;
+}
+
 G4MaterialPropertiesTable* OpticalMaterialProperties::PTP()
 {
   G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
