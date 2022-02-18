@@ -79,6 +79,26 @@ G4MaterialPropertiesTable* OpticalMaterialProperties::LAr()
   return mpt;
 }
 
+G4MaterialPropertiesTable* OpticalMaterialProperties::paulucci_LAr()
+{
+  G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+
+  Reader * pReader = Reader::getInstance();
+  G4String filepath = "./data/paulucci_lar_rindex.csv";
+  std::vector<G4double> energies, rindex;
+  G4int rindex_entries = pReader->ReadTwoColumnsCsv(filepath, energies, rindex, eV, 1.);
+  mpt->AddProperty("RINDEX", energies.data(), rindex.data(), rindex_entries);
+
+  // Absorption length (ABSLENGTH)
+  G4double energies_lim[]  = {OpticalMaterialProperties::energy_min,
+                              OpticalMaterialProperties::energy_max};
+  G4double abslength[]     = {OpticalMaterialProperties::abslength_max,
+                              OpticalMaterialProperties::abslength_max};
+  mpt->AddProperty("ABSLENGTH", energies_lim, abslength, 2);
+
+  return mpt;
+}
+
 G4MaterialPropertiesTable* OpticalMaterialProperties::PVT()
 {
   G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();

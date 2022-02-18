@@ -54,7 +54,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   const G4String world_name = "WORLD";
 
   G4Material* LAr = G4NistManager::Instance()->FindOrBuildMaterial("G4_lAr");
-  LAr->SetMaterialPropertiesTable(OpticalMaterialProperties::LAr());
+  LAr->SetMaterialPropertiesTable(OpticalMaterialProperties::paulucci_LAr());
 
   G4Sphere* world_solid_vol =
     new G4Sphere(world_name, 0., world_size_/2., 0., 360.*deg, 0., 180.*deg);
