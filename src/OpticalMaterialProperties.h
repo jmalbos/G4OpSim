@@ -26,9 +26,13 @@ namespace OpticalMaterialProperties {
 
   G4MaterialPropertiesTable* LAr();
 
+  G4MaterialPropertiesTable* paulucci_LAr();
+
   G4MaterialPropertiesTable* PVT();
 
   G4MaterialPropertiesTable* BC418();
+
+  G4MaterialPropertiesTable* EJ286();
 
   G4MaterialPropertiesTable* PTP();
 

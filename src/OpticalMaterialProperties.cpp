@@ -6,6 +6,7 @@
 // -----------------------------------------------------------------------------
 
 #include "OpticalMaterialProperties.h"
+#include "Reader.h"
 
 #include <G4MaterialPropertiesTable.hh>
 
@@ -67,6 +68,26 @@ G4MaterialPropertiesTable* OpticalMaterialProperties::LAr()
   }
 
   mpt->AddProperty("RINDEX", energies.data(), rindex.data(), energies.size());
+
+  // Absorption length (ABSLENGTH)
+  G4double energies_lim[]  = {OpticalMaterialProperties::energy_min,
+                              OpticalMaterialProperties::energy_max};
+  G4double abslength[]     = {OpticalMaterialProperties::abslength_max,
+                              OpticalMaterialProperties::abslength_max};
+  mpt->AddProperty("ABSLENGTH", energies_lim, abslength, 2);
+
+  return mpt;
+}
+
+G4MaterialPropertiesTable* OpticalMaterialProperties::paulucci_LAr()
+{
+  G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+
+  Reader * pReader = Reader::getInstance();
+  G4String filepath = "./data/paulucci_lar_rindex.csv";
+  std::vector<G4double> energies, rindex;
+  G4int rindex_entries = pReader->ReadTwoColumnsCsv(filepath, energies, rindex, eV, 1.);
+  mpt->AddProperty("RINDEX", energies.data(), rindex.data(), rindex_entries);
 
   // Absorption length (ABSLENGTH)
   G4double energies_lim[]  = {OpticalMaterialProperties::energy_min,
@@ -223,45 +244,46 @@ G4MaterialPropertiesTable* OpticalMaterialProperties::BC418()
   G4int WLS_abs_entries = 30;
   mpt->AddProperty("WLSABSLENGTH", WLS_abs_energy, WLS_abslength, WLS_abs_entries);
   
-  // Emision spectrum (WLSCOMPONENT)
-  // from *
-  G4double WLS_emi_energy[]   = {2.3896*eV, 2.4057*eV, 2.4283*eV, 2.4514*eV, 2.4777*eV, 
-        2.5118*eV, 2.5448*eV, 2.5722*eV, 2.5991*eV, 2.6231*eV, 
-        2.6508*eV, 2.677*eV, 2.7058*eV, 2.7307*eV, 2.7501*eV, 
-        2.7819*eV, 2.8059*eV, 2.8246*eV, 2.8457*eV, 2.86*eV, 
-        2.8773*eV, 2.8933*eV, 2.908*eV, 2.9199*eV, 2.9318*eV, 
-        2.9424*eV, 2.956*eV, 2.9713*eV, 2.9837*eV, 2.9946*eV, 
-        3.0056*eV, 3.0199*eV, 3.0246*eV, 3.0342*eV, 3.0422*eV, 
-        3.0535*eV, 3.0617*eV, 3.0732*eV, 3.083*eV, 3.0914*eV, 
-        3.1064*eV, 3.1171*eV, 3.1348*eV, 3.1682*eV, 3.1953*eV, 
-        3.2098*eV, 3.2208*eV, 3.2301*eV, 3.2397*eV, 3.2414*eV, 
-        3.249*eV, 3.2566*eV, 3.2642*eV, 3.2681*eV, 3.274*eV, 
-        3.2778*eV, 3.2836*eV, 3.2914*eV, 3.2986*eV, 3.3031*eV, 
-        3.3071*eV, 3.311*eV, 3.3189*eV, 3.3268*eV, 3.3406*eV, 
-        3.3485*eV, 3.3625*eV, 3.3792*eV, 3.4008*eV, 3.4211*eV, 
-        3.4478*eV, 3.4866*eV, 3.5343*eV};
-  G4double WLS_emi_Spectrum[] = {0.0, 0.0, 0.0, 0.0, 0.0021, 
-        0.0085, 0.0128, 0.0213, 0.0233, 0.0318, 
-        0.0407, 0.0519, 0.0645, 0.081, 0.0936, 
-        0.1237, 0.1498, 0.1733, 0.203, 0.2258, 
-        0.2539, 0.2821, 0.3081, 0.3374, 0.3609, 
-        0.3917, 0.4292, 0.4727, 0.5027, 0.5307, 
-        0.557, 0.6055, 0.6264, 0.6595, 0.6837, 
-        0.7373, 0.76, 0.7855, 0.8163, 0.839, 
-        0.8814, 0.9087, 0.9337, 0.9441, 0.9173, 
-        0.8839, 0.851, 0.8169, 0.7655, 0.7277, 
-        0.6862, 0.6304, 0.5892, 0.5514, 0.4858, 
-        0.4614, 0.4257, 0.376, 0.3294, 0.3023, 
-        0.2687, 0.2384, 0.2018, 0.1756, 0.135, 
-        0.1121, 0.0865, 0.0614, 0.0382, 0.0192, 
-        0.0043, 0.0, 0.0};
-  G4int WLS_emi_entries = 73;
-  mpt->AddProperty("WLSCOMPONENT", WLS_emi_energy, WLS_emi_Spectrum, WLS_emi_entries); 
-  
+
+  Reader * pReader = Reader::getInstance();
+  G4String filepath = "./data/BC418_emission_spectrum.csv";
+  std::vector<G4double> WLS_emi_energy, WLS_emi_spectrum;
+  G4int WLS_emi_entries = pReader->ReadTwoColumnsCsv(filepath, WLS_emi_energy, WLS_emi_spectrum, eV, 1.);
+  mpt->AddProperty("WLSCOMPONENT", WLS_emi_energy.data(), WLS_emi_spectrum.data(), WLS_emi_entries);
+
   //time that the WLS takes to emmit the absorved photon
   //from *
   mpt->AddConstProperty("WLSTIMECONSTANT", 1.4 * ns);
   //mpt->AddConstProperty("WLSMEANNUMBERPHOTONS", 1);
+
+  return mpt;
+}
+
+G4MaterialPropertiesTable * OpticalMaterialProperties::EJ286()
+{
+  //REMEMBER: For the moment, this EJ286 has infinite absorption length!
+  //eljentechnology.com/products/wavelength-shifting-plastics/ej-280-ej-282-ej-284-ej-286
+  G4MaterialPropertiesTable * mpt = new G4MaterialPropertiesTable();
+
+  Reader * pReader = Reader::getInstance();
+  G4String filepath;
+  
+  filepath = "./data/wlsbar_rindex.csv";
+  std::vector<G4double> rindex_energy, rindex;
+  G4int rindex_entries = pReader->ReadTwoColumnsCsv(filepath, rindex_energy, rindex, eV, 1.);
+  mpt->AddProperty("RINDEX", rindex_energy.data(), rindex.data(), rindex_entries);
+
+  filepath = "./data/EJ286_wlsabslength.csv";
+  std::vector<G4double> wlsabslength_energy, wlsabslength;
+  G4int wlsabslength_entries = pReader->ReadTwoColumnsCsv(filepath, wlsabslength_energy, wlsabslength, eV, mm);
+  mpt->AddProperty("WLSABSLENGTH", wlsabslength_energy.data(), wlsabslength.data(), wlsabslength_entries);
+
+  filepath = "./data/EJ286_emission.csv";
+  std::vector<G4double> emission_energy, emission;
+  G4int emission_entries = pReader->ReadTwoColumnsCsv(filepath, emission_energy, emission, eV, 1.);
+  mpt->AddProperty("WLSCOMPONENT", emission_energy.data(), emission.data(), emission_entries);
+
+  mpt->AddConstProperty("WLSTIMECONSTANT", 1.2 *ns);
 
   return mpt;
 }

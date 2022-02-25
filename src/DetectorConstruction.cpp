@@ -54,7 +54,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   const G4String world_name = "WORLD";
 
   G4Material* LAr = G4NistManager::Instance()->FindOrBuildMaterial("G4_lAr");
-  LAr->SetMaterialPropertiesTable(OpticalMaterialProperties::LAr());
+  LAr->SetMaterialPropertiesTable(OpticalMaterialProperties::paulucci_LAr());
 
   G4Sphere* world_solid_vol =
     new G4Sphere(world_name, 0., world_size_/2., 0., 360.*deg, 0., 180.*deg);
@@ -89,7 +89,7 @@ void DetectorConstruction::ConstructWLSPlate(G4VPhysicalVolume* world_phys_vol) 
     new G4Box(plate_name, plate_width_/2., plate_thickn_/2., plate_length_/2.);
 
   G4Material* pvt = G4NistManager::Instance()->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
-  pvt->SetMaterialPropertiesTable(OpticalMaterialProperties::BC418());
+  pvt->SetMaterialPropertiesTable(OpticalMaterialProperties::EJ286());
 
   G4LogicalVolume* plate_logic_vol =
     new G4LogicalVolume(plate_solid_vol, pvt, plate_name);
